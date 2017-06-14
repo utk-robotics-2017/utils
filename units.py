@@ -120,6 +120,7 @@ class Unit:
         else:
             return self.base_value >= other.base_value
 
+
 unit_forward_declare = Unit
 
 
@@ -292,5 +293,6 @@ class Temperature(Unit):
     C = 1
     K = 2
     F = 3
+
 
 zero_unit = Unit(0)
