@@ -1,6 +1,7 @@
 import math
 import time
 import signal
+import sys
 import functools
 from queue import Queue
 from threading import Thread
@@ -42,23 +43,54 @@ def type_check(f):
         sig = signature(f)
         ba = sig.bind(*args, **kwargs)
         for i, (arg_name, arg_value) in enumerate(ba.arguments.items()):
-            if arg_name == 'self':
+            if arg_name in ['self', 'cls']:
                 continue
 
-            if not isinstance(arg_value, sig.parameters[arg_name].annotation):
+            if(isinstance(sig.parameters[arg_name].annotation, str) and 'self' in sig.parameters
+               and sig.parameters[arg_name].annotation == ba.arguments['self'].__class__.__name__):
+                annotation = type(ba.arguments['self'])
+            else:
+                annotation = sig.parameters[arg_name].annotation
+            if not isinstance(arg_value, annotation):
                 raise TypeError("{} argument {} is of type {}, but should be of type {}"
                                 .format(f.__name__, arg_name, type(arg_value), sig.parameters[arg_name].annotation))
 
         result = f(*args, **kwargs)
 
         # check that the result is the correct type
-        if sig.return_annotation != Signature.empty and not isinstance(result, sig.return_annotation):
-            raise TypeError("{} return value {} is of type {}, but should be of type {}"
-                            .format(f.__name__, result, type(result), sig.return_annotation))
+        if sig.return_annotation != Signature.empty:
+            if(isinstance(sig.return_annotation, str) and 'self' in sig.parameters and
+               sig.return_annotation == ba.arguments['self'].__class__.__name__):
+                return_annotation = type(ba.arguments['self'])
+            else:
+                return_annotation = sig.return_annotation
+            if not isinstance(result, return_annotation):
+                raise TypeError("{} return value {} is of type {}, but should be of type {}"
+                                .format(f.__name__, result, type(result), sig.return_annotation))
 
         return result
     wrapper.__doc__ = f.__doc__
     return wrapper
+
+
+def ignore_decorators_traceback(func):
+    """ decorator that removes other decorators from traceback """
+    @functools.wraps(func)
+    def wrapper_ignore_exctb(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            # Code to remove this decorator from traceback
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            try:
+                exc_traceback = exc_traceback.tb_next
+                exc_traceback = exc_traceback.tb_next
+            except Exception:
+                pass
+            ex = exc_type(exc_value)
+            ex.__traceback__ = exc_traceback
+            raise ex
+    return wrapper_ignore_exctb
 
 
 # Retry decorator with exponential backoff

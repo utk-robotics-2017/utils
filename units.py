@@ -1,9 +1,6 @@
 import math
 from .decorators import attr_check, type_check, void
 
-unit_forward_declare = None
-
-
 @attr_check
 class Unit:
     base_value = float
@@ -20,60 +17,60 @@ class Unit:
         return self.base_value / unit
 
     @type_check
-    def __add__(self, other: unit_forward_declare) -> unit_forward_declare:
+    def __add__(self, other: 'Unit') -> 'Unit':
         return Unit(self.base_value + other.base_value)
 
     @type_check
-    def __sub__(self, other: unit_forward_declare) -> unit_forward_declare:
+    def __sub__(self, other: 'Unit') -> 'Unit':
         return Unit(self.base_value - other.base_value)
 
     @type_check
-    def __mul__(self, other: (float, int, unit_forward_declare)) -> unit_forward_declare:
+    def __mul__(self, other: (float, int, 'Unit')) -> 'Unit':
         if isinstance(other, (float, int)):
             return Unit(self.base_value * other)
         else:
             return Unit(self.base_value * other.base_value)
 
     @type_check
-    def __truediv__(self, other: (float, int, unit_forward_declare)) -> unit_forward_declare:
+    def __truediv__(self, other: (float, int, 'Unit')) -> 'Unit':
         if isinstance(other, (float, int)):
             return Unit(self.base_value / other)
         else:
             return Unit(self.base_value / other.base_value)
 
     @type_check
-    def __iadd__(self, other: unit_forward_declare) -> unit_forward_declare:
+    def __iadd__(self, other: 'Unit') -> 'Unit':
         return Unit(self.base_value + other.base_value)
 
     @type_check
-    def __isub__(self, other: unit_forward_declare) -> unit_forward_declare:
+    def __isub__(self, other: 'Unit') -> 'Unit':
         return Unit(self.base_value - other.base_value)
 
     @type_check
-    def __imul__(self, other: unit_forward_declare) -> unit_forward_declare:
+    def __imul__(self, other: 'Unit') -> 'Unit':
         return Unit(self.base_value * other.base_value)
 
     @type_check
-    def __itruediv__(self, other: (float, int, unit_forward_declare)) -> unit_forward_declare:
+    def __itruediv__(self, other: (float, int, 'Unit')) -> 'Unit':
         if isinstance(other, (float, int)):
             return Unit(self.base_value / other)
         else:
             return Unit(self.base_value / other.base_value)
 
     @type_check
-    def __neg__(self) -> unit_forward_declare:
+    def __neg__(self) -> 'Unit':
         return Unit(-1 * self.base_value)
 
     @type_check
-    def __pos__(self) -> unit_forward_declare:
+    def __pos__(self) -> 'Unit':
         return Unit(self.base_value)
 
     @type_check
-    def __abs__(self) -> unit_forward_declare:
+    def __abs__(self) -> 'Unit':
         return Unit(abs(self.base_value))
 
     @type_check
-    def __lt__(self, other: (float, int, unit_forward_declare)) -> bool:
+    def __lt__(self, other: (float, int, 'Unit')) -> bool:
         if isinstance(other, (float, int)):
             if other == 0:
                 return self.base_value < 0
@@ -83,7 +80,7 @@ class Unit:
             return self.base_value < other.base_value
 
     @type_check
-    def __le__(self, other: (float, int, unit_forward_declare)) -> bool:
+    def __le__(self, other: (float, int, 'Unit')) -> bool:
         if isinstance(other, (float, int)):
             if other == 0:
                 return self.base_value <= 0
@@ -93,15 +90,15 @@ class Unit:
             return self.base_value <= other.base_value
 
     @type_check
-    def __eq__(self, other: unit_forward_declare) -> bool:
+    def __eq__(self, other: 'Unit') -> bool:
         return self.base_value == other.base_value
 
     @type_check
-    def __ne__(self, other: unit_forward_declare) -> bool:
+    def __ne__(self, other: 'Unit') -> bool:
         return self.base_value != other.base_value
 
     @type_check
-    def __gt__(self, other: (float, int, unit_forward_declare)) -> bool:
+    def __gt__(self, other: (float, int, 'Unit')) -> bool:
         if isinstance(other, (float, int)):
             if other == 0:
                 return self.base_value > 0
@@ -111,7 +108,7 @@ class Unit:
             return self.base_value > other.base_value
 
     @type_check
-    def __ge__(self, other: (float, int, unit_forward_declare)) -> bool:
+    def __ge__(self, other: (float, int, 'Unit')) -> bool:
         if isinstance(other, (float, int)):
             if other == 0:
                 return self.base_value >= 0
@@ -119,9 +116,6 @@ class Unit:
                 raise Exception("Unit cannot be compared to value {}".format(other))
         else:
             return self.base_value >= other.base_value
-
-
-unit_forward_declare = Unit
 
 
 class Constant(Unit):
