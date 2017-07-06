@@ -1,3 +1,4 @@
+import exception
 import math
 import time
 import signal
@@ -37,6 +38,10 @@ def attr_check(cls):
     return new_cls
 
 
+class StringLiteralAsAnnotationTypeException(exception):
+    pass
+
+
 def type_check(f):
     def wrapper(*args, **kwargs):
         # Go through the arguments and make sure they are the correct type
@@ -46,9 +51,23 @@ def type_check(f):
             if arg_name in ['self', 'cls']:
                 continue
 
-            if(isinstance(sig.parameters[arg_name].annotation, str) and 'self' in sig.parameters
-               and sig.parameters[arg_name].annotation == ba.arguments['self'].__class__.__name__):
-                annotation = type(ba.arguments['self'])
+            # If the annotation is a string check if it is the current class name and if that is the case
+            # set the annotation to the current class, otherwise leave it
+            if isinstance(sig.parameters[arg_name].annotation, str):
+                # all object methods have self
+                if 'self' in sig.parameters:
+                    if sig.parameters[arg_name].annotation == ba.arguments['self'].__class__.__name__:
+                        annotation = type(ba.arguments['self'])
+                    else:  # Should this be an error?
+                        raise StringLiteralAsAnnotationTypeException()
+                # all class methods have cls
+                elif 'cls' in sig.parameters:
+                    if sig.parameters[arg_name].annotation == ba.arguments['cls'].__name__:
+                        annotation = type(ba.arugment['cls'])
+                    else:
+                        raise StringLiteralAsAnnotationTypeException()
+                else:
+                    raise StringLiteralAsAnnotationTypeException()
             else:
                 annotation = sig.parameters[arg_name].annotation
             if not isinstance(arg_value, annotation):
@@ -59,9 +78,19 @@ def type_check(f):
 
         # check that the result is the correct type
         if sig.return_annotation != Signature.empty:
-            if(isinstance(sig.return_annotation, str) and 'self' in sig.parameters and
-               sig.return_annotation == ba.arguments['self'].__class__.__name__):
-                return_annotation = type(ba.arguments['self'])
+            if isinstance(sig.return_annotation, str):
+                if 'self' in sig.parameter:
+                    if sig.return_annotation == ba.arguments['self'].__class__.__name__:
+                        return_annotation = type(ba.arguments['self'])
+                    else:
+                        raise StringLiteralAsAnnotationTypeException()
+                elif 'cls' in sig.parameter:
+                    if sig.return_annotation == ba.arguments['self'].__class__.__name__:
+                        return_annotation = type(ba.arugment['cls'])
+                    else:
+                        raise StringLiteralAsAnnotationTypeException()
+                else:
+                    raise StringLiteralAsAnnotationTypeException()
             else:
                 return_annotation = sig.return_annotation
             if not isinstance(result, return_annotation):
