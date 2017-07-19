@@ -1,4 +1,3 @@
-import exception
 import math
 import time
 import signal
@@ -38,7 +37,7 @@ def attr_check(cls):
     return new_cls
 
 
-class StringLiteralAsAnnotationTypeException(exception):
+class StringLiteralAsAnnotationTypeException(Exception):
     pass
 
 
