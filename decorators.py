@@ -38,67 +38,8 @@ def attr_check(cls):
 
 
 class StringLiteralAsAnnotationTypeException(Exception):
-    pass
-
-
-def type_check(f):
-    def wrapper(*args, **kwargs):
-        # Go through the arguments and make sure they are the correct type
-        sig = signature(f)
-        ba = sig.bind(*args, **kwargs)
-        for i, (arg_name, arg_value) in enumerate(ba.arguments.items()):
-            if arg_name in ['self', 'cls']:
-                continue
-
-            # If the annotation is a string check if it is the current class name and if that is the case
-            # set the annotation to the current class, otherwise leave it
-            if isinstance(sig.parameters[arg_name].annotation, str):
-                # all object methods have self
-                if 'self' in sig.parameters:
-                    if sig.parameters[arg_name].annotation == ba.arguments['self'].__class__.__name__:
-                        annotation = type(ba.arguments['self'])
-                    else:  # Should this be an error?
-                        raise StringLiteralAsAnnotationTypeException()
-                # all class methods have cls
-                elif 'cls' in sig.parameters:
-                    if sig.parameters[arg_name].annotation == ba.arguments['cls'].__name__:
-                        annotation = type(ba.arugment['cls'])
-                    else:
-                        raise StringLiteralAsAnnotationTypeException()
-                else:
-                    raise StringLiteralAsAnnotationTypeException()
-            else:
-                annotation = sig.parameters[arg_name].annotation
-            if not isinstance(arg_value, annotation):
-                raise TypeError("{} argument {} is of type {}, but should be of type {}"
-                                .format(f.__name__, arg_name, type(arg_value), sig.parameters[arg_name].annotation))
-
-        result = f(*args, **kwargs)
-
-        # check that the result is the correct type
-        if sig.return_annotation != Signature.empty:
-            if isinstance(sig.return_annotation, str):
-                if 'self' in sig.parameter:
-                    if sig.return_annotation == ba.arguments['self'].__class__.__name__:
-                        return_annotation = type(ba.arguments['self'])
-                    else:
-                        raise StringLiteralAsAnnotationTypeException()
-                elif 'cls' in sig.parameter:
-                    if sig.return_annotation == ba.arguments['self'].__class__.__name__:
-                        return_annotation = type(ba.arugment['cls'])
-                    else:
-                        raise StringLiteralAsAnnotationTypeException()
-                else:
-                    raise StringLiteralAsAnnotationTypeException()
-            else:
-                return_annotation = sig.return_annotation
-            if not isinstance(result, return_annotation):
-                raise TypeError("{} return value {} is of type {}, but should be of type {}"
-                                .format(f.__name__, result, type(result), sig.return_annotation))
-
-        return result
-    wrapper.__doc__ = f.__doc__
-    return wrapper
+    def __init__(self, function_name: str, argument_name: str):
+        super(StringLiteralAsAnnotationTypeException, self).__init__('Function {} argument {}'.format(function_name, argument_name))
 
 
 def ignore_decorators_traceback(func):
@@ -115,10 +56,72 @@ def ignore_decorators_traceback(func):
                 exc_traceback = exc_traceback.tb_next
             except Exception:
                 pass
-            ex = exc_type(exc_value)
-            ex.__traceback__ = exc_traceback
-            raise ex
+            raise exc_type.with_traceback(exc_value, exc_traceback)
     return wrapper_ignore_exctb
+
+
+def type_check(f):
+    @ignore_decorators_traceback
+    def wrapper(*args, **kwargs):
+        # Go through the arguments and make sure they are the correct type
+        sig = signature(f)
+        ba = sig.bind(*args, **kwargs)
+        for i, (arg_name, arg_value) in enumerate(ba.arguments.items()):
+            if arg_name in ['self', 'cls']:
+                continue
+
+            # If the annotation is a string check if it is the current class name and if that is the case
+            # set the annotation to the current class, otherwise leave it
+            if isinstance(sig.parameters[arg_name].annotation, str):
+                # all object methods have self
+                if 'self' in sig.parameters:
+                    class_names = [base.__name__ for base in type(ba.arguments['self']).__bases__]
+                    class_names.append(ba.arguments['self'].__class__.__name__)
+                    if sig.parameters[arg_name].annotation in class_names:
+                        annotation = type(ba.arguments['self'])
+                    else:  # Should this be an error?
+                        raise StringLiteralAsAnnotationTypeException(f.__name__, arg_name)
+                # all class methods have cls
+                elif 'cls' in sig.parameters:
+                    if sig.parameters[arg_name].annotation == ba.arguments['cls'].__name__:
+                        annotation = type(ba.arugment['cls'])
+                    else:
+                        raise StringLiteralAsAnnotationTypeException(f.__name__, arg_name)
+                else:
+                    raise StringLiteralAsAnnotationTypeException(f.__name__, arg_name)
+            else:
+                annotation = sig.parameters[arg_name].annotation
+            if not isinstance(arg_value, annotation):
+                raise TypeError("{} argument {} is of type {}, but should be of type {}"
+                                .format(f.__name__, arg_name, type(arg_value), sig.parameters[arg_name].annotation))
+
+        result = f(*args, **kwargs)
+
+        # check that the result is the correct type
+        if sig.return_annotation != Signature.empty:
+            if isinstance(sig.return_annotation, str):
+                if 'self' in sig.parameters:
+                    if sig.return_annotation == ba.arguments['self'].__class__.__name__:
+                        return_annotation = type(ba.arguments['self'])
+                    else:
+                        raise StringLiteralAsAnnotationTypeException(f.__name__, arg_name)
+                elif 'cls' in sig.parameters:
+                    if sig.return_annotation == ba.arguments['self'].__class__.__name__:
+                        return_annotation = type(ba.arugment['cls'])
+                    else:
+                        raise StringLiteralAsAnnotationTypeException(f.__name__, arg_name)
+                else:
+                    raise StringLiteralAsAnnotationTypeException(f.__name__, arg_name)
+            else:
+                return_annotation = sig.return_annotation
+            if not isinstance(result, return_annotation):
+                raise TypeError("{} return value {} is of type {}, but should be of type {}"
+                                .format(f.__name__, result, type(result), sig.return_annotation))
+
+        return result
+    wrapper.__name__ = f.__name__
+    wrapper.__doc__ = f.__doc__
+    return wrapper
 
 
 # Retry decorator with exponential backoff

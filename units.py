@@ -117,6 +117,9 @@ class Unit:
         else:
             return self.base_value >= other.base_value
 
+    def __call__(self) -> float:
+        return self.base_value
+
 
 class Constant(Unit):
     def __init__(self, value):
