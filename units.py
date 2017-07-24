@@ -17,45 +17,45 @@ class Unit:
         return self.base_value / unit
 
     @type_check
-    def __add__(self, other: 'Unit') -> 'Unit':
-        return Unit(self.base_value + other.base_value)
+    def __add__(self, rhs: 'Unit') -> 'Unit':
+        return Unit(self.base_value + rhs.base_value)
 
     @type_check
-    def __sub__(self, other: 'Unit') -> 'Unit':
-        return Unit(self.base_value - other.base_value)
+    def __sub__(self, rhs: 'Unit') -> 'Unit':
+        return Unit(self.base_value - rhs.base_value)
 
     @type_check
-    def __mul__(self, other: (float, int, 'Unit')) -> 'Unit':
-        if isinstance(other, (float, int)):
-            return Unit(self.base_value * other)
+    def __mul__(self, rhs: (float, int, 'Unit')) -> 'Unit':
+        if isinstance(srh, (float, int)):
+            return Unit(self.base_value * rhs)
         else:
-            return Unit(self.base_value * other.base_value)
+            return Unit(self.base_value * rhs.base_value)
 
     @type_check
-    def __truediv__(self, other: (float, int, 'Unit')) -> 'Unit':
-        if isinstance(other, (float, int)):
-            return Unit(self.base_value / other)
+    def __truediv__(self, rhs: (float, int, 'Unit')) -> 'Unit':
+        if isinstance(rhs, (float, int)):
+            return Unit(self.base_value / rhs)
         else:
-            return Unit(self.base_value / other.base_value)
+            return Unit(self.base_value / rhs.base_value)
 
     @type_check
-    def __iadd__(self, other: 'Unit') -> 'Unit':
-        return Unit(self.base_value + other.base_value)
+    def __iadd__(self, rhs: 'Unit') -> 'Unit':
+        return Unit(self.base_value + rhs.base_value)
 
     @type_check
-    def __isub__(self, other: 'Unit') -> 'Unit':
-        return Unit(self.base_value - other.base_value)
+    def __isub__(self, rhs: 'Unit') -> 'Unit':
+        return Unit(self.base_value - rhs.base_value)
 
     @type_check
-    def __imul__(self, other: 'Unit') -> 'Unit':
-        return Unit(self.base_value * other.base_value)
+    def __imul__(self, rhs: 'Unit') -> 'Unit':
+        return Unit(self.base_value * rhs.base_value)
 
     @type_check
-    def __itruediv__(self, other: (float, int, 'Unit')) -> 'Unit':
-        if isinstance(other, (float, int)):
-            return Unit(self.base_value / other)
+    def __itruediv__(self, rhs: (float, int, 'Unit')) -> 'Unit':
+        if isinstance(rhs, (float, int)):
+            return Unit(self.base_value / rhs)
         else:
-            return Unit(self.base_value / other.base_value)
+            return Unit(self.base_value / rhs.base_value)
 
     @type_check
     def __neg__(self) -> 'Unit':
@@ -70,52 +70,52 @@ class Unit:
         return Unit(abs(self.base_value))
 
     @type_check
-    def __lt__(self, other: (float, int, 'Unit')) -> bool:
-        if isinstance(other, (float, int)):
-            if other == 0:
+    def __lt__(self, rhs: (float, int, 'Unit')) -> bool:
+        if isinstance(rhs, (float, int)):
+            if rhs == 0:
                 return self.base_value < 0
             else:
-                raise Exception("Unit cannot be compared to value {}".format(other))
+                raise Exception("Unit cannot be compared to value {}".format(rhs))
         else:
-            return self.base_value < other.base_value
+            return self.base_value < rhs.base_value
 
     @type_check
-    def __le__(self, other: (float, int, 'Unit')) -> bool:
-        if isinstance(other, (float, int)):
-            if other == 0:
+    def __le__(self, rhs: (float, int, 'Unit')) -> bool:
+        if isinstance(rhs, (float, int)):
+            if rhs == 0:
                 return self.base_value <= 0
             else:
-                raise Exception("Unit cannot be compared to value {}".format(other))
+                raise Exception("Unit cannot be compared to value {}".format(rhs))
         else:
-            return self.base_value <= other.base_value
+            return self.base_value <= rhs.base_value
 
     @type_check
-    def __eq__(self, other: 'Unit') -> bool:
-        return self.base_value == other.base_value
+    def __eq__(self, rhs: 'Unit') -> bool:
+        return self.base_value == rhs.base_value
 
     @type_check
-    def __ne__(self, other: 'Unit') -> bool:
-        return self.base_value != other.base_value
+    def __ne__(self, rhs: 'Unit') -> bool:
+        return self.base_value != rhs.base_value
 
     @type_check
-    def __gt__(self, other: (float, int, 'Unit')) -> bool:
-        if isinstance(other, (float, int)):
-            if other == 0:
+    def __gt__(self, rhs: (float, int, 'Unit')) -> bool:
+        if isinstance(rhs, (float, int)):
+            if rhs == 0:
                 return self.base_value > 0
             else:
-                raise Exception("Unit cannot be compared to value {}".format(other))
+                raise Exception("Unit cannot be compared to value {}".format(rhs))
         else:
-            return self.base_value > other.base_value
+            return self.base_value > rhs.base_value
 
     @type_check
-    def __ge__(self, other: (float, int, 'Unit')) -> bool:
-        if isinstance(other, (float, int)):
-            if other == 0:
+    def __ge__(self, rhs: (float, int, 'Unit')) -> bool:
+        if isinstance(rhs, (float, int)):
+            if rhs == 0:
                 return self.base_value >= 0
             else:
-                raise Exception("Unit cannot be compared to value {}".format(other))
+                raise Exception("Unit cannot be compared to value {}".format(rhs))
         else:
-            return self.base_value >= other.base_value
+            return self.base_value >= rhs.base_value
 
     def __call__(self) -> float:
         return self.base_value
